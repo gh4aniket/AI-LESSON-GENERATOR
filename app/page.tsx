@@ -14,19 +14,14 @@ export default function HomePage() {
   const router = useRouter();
 
   useEffect(() => {
-    
-    const channel = supabase
-      .channel("realtime:lessons")
-      .on("postgres_changes", { event: "*", schema: "public", table: "lessons" }, fetchLessons)
-      .subscribe();
-    return () => supabase.removeChannel(channel);
-  }, []);
-
-  async function fetchLessons() {
+     async function fetchLessons() {
     const { data } = await supabase.from("lessons").select("*").order("created_at", { ascending: false });
     setLessons(data || []);
-    fetchLessons();
   }
+fetchLessons();
+  }, []);
+
+ 
 
   async function handleGenerate() {
     const { data } = await supabase.from("lessons").insert([{ outline }]).select().single();
