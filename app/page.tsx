@@ -1,51 +1,68 @@
-import { DeployButton } from "@/components/deploy-button";
-import { EnvVarWarning } from "@/components/env-var-warning";
-import { AuthButton } from "@/components/auth-button";
-import { Hero } from "@/components/hero";
-import { ThemeSwitcher } from "@/components/theme-switcher";
-import { ConnectSupabaseSteps } from "@/components/tutorial/connect-supabase-steps";
-import { SignUpUserSteps } from "@/components/tutorial/sign-up-user-steps";
-import { hasEnvVars } from "@/lib/utils";
-import Link from "next/link";
+"use client";
+import { useState, useEffect } from "react";
+import { createClient } from "@supabase/supabase-js";
+import { useRouter } from "next/navigation";
 
-export default function Home() {
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
+);
+
+export default function HomePage() {
+  const [outline, setOutline] = useState("");
+  const [lessons, setLessons] = useState<any[]>([]);
+  const router = useRouter();
+
+  useEffect(() => {
+    
+    const channel = supabase
+      .channel("realtime:lessons")
+      .on("postgres_changes", { event: "*", schema: "public", table: "lessons" }, fetchLessons)
+      .subscribe();
+    return () => supabase.removeChannel(channel);
+  }, []);
+
+  async function fetchLessons() {
+    const { data } = await supabase.from("lessons").select("*").order("created_at", { ascending: false });
+    setLessons(data || []);
+    fetchLessons();
+  }
+
+  async function handleGenerate() {
+    const { data } = await supabase.from("lessons").insert([{ outline }]).select().single();
+    await fetch("/api/generate", {
+      method: "POST",
+      body: JSON.stringify({ id: data.id, outline }),
+    });
+    setOutline("");
+  }
+
   return (
-    <main className="min-h-screen flex flex-col items-center">
-      <div className="flex-1 w-full flex flex-col gap-20 items-center">
-        <nav className="w-full flex justify-center border-b border-b-foreground/10 h-16">
-          <div className="w-full max-w-5xl flex justify-between items-center p-3 px-5 text-sm">
-            <div className="flex gap-5 items-center font-semibold">
-              <Link href={"/"}>Next.js Supabase Starter</Link>
-              <div className="flex items-center gap-2">
-                <DeployButton />
-              </div>
-            </div>
-            {!hasEnvVars ? <EnvVarWarning /> : <AuthButton />}
-          </div>
-        </nav>
-        <div className="flex-1 flex flex-col gap-20 max-w-5xl p-5">
-          <Hero />
-          <main className="flex-1 flex flex-col gap-6 px-4">
-            <h2 className="font-medium text-xl mb-4">Next steps</h2>
-            {hasEnvVars ? <SignUpUserSteps /> : <ConnectSupabaseSteps />}
-          </main>
-        </div>
+    <div className="max-w-2xl mx-auto p-6">
+      <h1 className="text-2xl font-bold mb-4">AI Lesson Generator</h1>
+      <textarea
+        className="w-full border p-2 rounded mb-2"
+        placeholder="Enter lesson outline..."
+        value={outline}
+        onChange={(e) => setOutline(e.target.value)}
+      />
+      <button onClick={handleGenerate} className="bg-blue-500 text-white px-4 py-2 rounded">
+        Generate
+      </button>
 
-        <footer className="w-full flex items-center justify-center border-t mx-auto text-center text-xs gap-8 py-16">
-          <p>
-            Powered by{" "}
-            <a
-              href="https://supabase.com/?utm_source=create-next-app&utm_medium=template&utm_term=nextjs"
-              target="_blank"
-              className="font-bold hover:underline"
-              rel="noreferrer"
-            >
-              Supabase
-            </a>
-          </p>
-          <ThemeSwitcher />
-        </footer>
-      </div>
-    </main>
+      <table className="w-full mt-6 border">
+        <thead>
+          <tr><th>Title</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          {lessons.map((l) => (
+            <tr key={l.id} onClick={() => router.push(`/lessons/${l.id}`)} className="cursor-pointer hover:bg-gray-100">
+              <td>{l.outline.slice(0, 40)}</td>
+              <td>{l.status}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
