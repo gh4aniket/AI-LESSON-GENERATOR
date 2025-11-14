@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { useParams } from "next/navigation";
-import AIcode from "./ai-code";
+import CountingNumbers from "./ai-code";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -39,7 +39,7 @@ data.generated_code=cleaned;
       
      <p>outline: {lesson.outline}</p>
     <p>data:{lesson.generated_code?lesson.generated_code:"no"}</p>
-     <AIcode/>
+     <CountingNumbers/>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
 import { createClient } from "@supabase/supabase-js";
+import { compileTSXInSandbox } from "@/lib/esbuildSandbox";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -15,19 +16,34 @@ export async function POST(req: Request) {
   await supabase.from("lessons").update({ status: "generating" }).eq("id", id);
 
   const prompt = `
-You are an expert lesson genera that outputs a single TypeScript React component.
-Output ONLY code — no explanations.
-The component should export default function Lesson(): JSX.Element.
-Create a small educational lesson for this outline:
-"${outline}"
+ Generate a complete React TSX component for this lesson outline:
+      "${outline}"
+
+      Requirements:
+      - Must include "export default" for a React component.
+      - Must not include markdown, no backticks.
+      - Return ONLY valid TSX code.
 `;
 
   const completion = await ai.models.generateContent({
     model: "gemini-2.5-flash",
     contents: prompt,
   });
-console.log(completion);
   const code = completion?.candidates[0].content.parts[0].text || "// generation failed";
+console.log(code);
+  const sandboxResult = await compileTSXInSandbox(code);
+
+ if (!sandboxResult.ok) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: "Lesson TSX failed to compile in sandbox.",
+          details: sandboxResult.error,
+          raw: code,
+        },
+        { status: 422 }
+      );
+    }
 
   await supabase
     .from("lessons")
