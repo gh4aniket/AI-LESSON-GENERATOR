@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { useParams } from "next/navigation";
+import AIcode from "./ai-code";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -15,7 +16,12 @@ export default function LessonView() {
   useEffect(() => {
     async function load() {
       const { data } = await supabase.from("lessons").select("*").eq("id", id).single();
+      const cleaned = data.generated_code?data.generated_code
+  .replace(/^```(?:tsx)?\s*\n/, "") 
+  .replace(/```$/, ""):""; 
+data.generated_code=cleaned;
       setLesson(data);
+      console.log(lesson);
     }
     load();
   }, [id]);
@@ -26,13 +32,14 @@ export default function LessonView() {
     <div className="p-6">
       <h1 className="text-xl font-bold mb-4">Lesson View</h1>
       {lesson.generated_code ? (
-        <iframe
-          srcDoc={`<html><body><script type="module">${lesson.generated_code}</script></body></html>`}
-          className="w-full h-[600px] border rounded"
-        />
+       "dvdsvds"
       ) : (
         <p>Status: {lesson.status}</p>
       )}
+      
+     <p>outline: {lesson.outline}</p>
+    <p>data:{lesson.generated_code?lesson.generated_code:"no"}</p>
+     <AIcode/>
     </div>
   );
 }
