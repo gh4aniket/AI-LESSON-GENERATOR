@@ -2,7 +2,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
+    "build": "next build",
     "build:worker": "esbuild lib/esbuildWorker.ts --bundle --platform=node --external:esbuild --outfile=lib/esbuildWorker.js",
     "start": "next start",
     "lint": "eslint ."
