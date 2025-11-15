@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
+import { ThemeSwitcher } from "@/components/theme-switcher";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -79,6 +80,7 @@ if(status=="generated")
 
   return (
     <div className="max-w-2xl mx-auto p-6">
+       <ThemeSwitcher />
       <h1 className="text-3xl font-extrabold mb-4 text-blue-800 border-b-2 border-blue-300 pb-2">
         AI Lesson Generator
       </h1>
