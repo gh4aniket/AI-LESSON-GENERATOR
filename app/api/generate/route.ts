@@ -226,7 +226,9 @@ const HowToCookFishLesson = () => {
     model: "gemini-2.5-flash",
     contents: prompt,
   });
-  const code = completion?.candidates[0].content.parts[0].text || "// generation failed";
+const code =
+  completion?.candidates?.[0]?.content?.parts?.[0]?.text ?? "// generation failed";
+
  
   await supabase
     .from("lessons")
