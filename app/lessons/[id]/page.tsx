@@ -30,17 +30,11 @@ data.generated_code=cleaned;
   if (!lesson) return <div>Loading...</div>;
 
   return (
-    <div className="p-6">
-      <h1 className="text-xl font-bold mb-4">Lesson View</h1>
-      {lesson.generated_code ? (
-       "dvdsvds"
-      ) : (
-        <p>Status: {lesson.status}</p>
-      )}
-      
-     <p>outline: {lesson.outline}</p>
-    <p>data:{lesson.generated_code?lesson.generated_code:"no"}</p>
-<DynamicRenderer code={lesson.generated_code} />
-    </div>
+    <div className="min-h-screen flex items-center justify-center mt-10">
+  <div className="p-6 mb-50 w-[1000px]">
+    <DynamicRenderer code={lesson.generated_code} />
+  </div>
+</div>
+
   );
 }

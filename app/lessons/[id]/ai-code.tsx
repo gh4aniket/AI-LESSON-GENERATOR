@@ -8,14 +8,12 @@ export default function DynamicRenderer({ code }: { code: string }) {
 
   useEffect(() => {
     try {
-      // Compile JSX/TSX → plain JS
       const compiled = Babel.transform(code, {
         presets: ["react", "typescript"],
         plugins: ["transform-modules-commonjs"],
         filename: "dynamic-component.tsx",
       }).code;
 
-      // Create a module-like wrapper so we can read module.exports.default
       const module: any = { exports: {} };
 
       const requireShim = (name: string) => {
@@ -23,11 +21,9 @@ export default function DynamicRenderer({ code }: { code: string }) {
         throw new Error(`Unknown import: ${name}`);
       };
 
-      // Execute compiled code
       const func = new Function("module", "exports", "require", compiled);
       func(module, module.exports, requireShim);
 
-      // Get the default export
       const Component = module.exports.default;
 
       if (Component) {

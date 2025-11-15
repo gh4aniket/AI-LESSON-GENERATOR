@@ -84,7 +84,7 @@ if(status=="generated")
       </h1>
 
       <textarea
-        className="w-full border border-blue-300 p-3 rounded-lg text-blue-900 bg-white transition-all duration-300 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-300 shadow-sm"
+        className="w-[630px] border h-[100px] border-blue-300 p-3 rounded-lg text-blue-900 bg-white transition-all duration-300 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-300 shadow-sm"
         placeholder="Enter lesson outline..."
         value={outline}
         onChange={(e) => setOutline(e.target.value)}

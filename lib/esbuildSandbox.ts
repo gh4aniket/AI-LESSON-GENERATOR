@@ -1,4 +1,3 @@
-// lib/esbuildSandbox.ts
 import { Worker } from "worker_threads";
 import path from "path";
 
