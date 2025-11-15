@@ -232,7 +232,7 @@ const code =
  
   await supabase
     .from("lessons")
-    .update({ generated_code: code, status: "generated" ,compiled_js: sandboxResult.js})
+    .update({ generated_code: code, status: "generated"})
     .eq("id", id);
 
   return NextResponse.json({ success: code});
