@@ -1,70 +1,43 @@
 "use client";
-import { useState } from "react";
-export default function AIcode() {
-    const images=[/*list of text strings contianing url of images in "" seperated by comma */];
-    const srcurl="/*url for video */";
-    return(
-    <div className="w-full flex justify-center px-4 py-8">
-      <div className="w-full max-w-5xl">
 
-        {/* Title – Full width on all screens */}
-        <h1 className="text-3xl lg:text-4xl font-bold text-gray-800 mb-8">
-           {/*title comes here */ }
-        </h1>
+import React, { useState, useEffect } from "react";
+import * as Babel from "@babel/standalone";
 
-        {/* 2-column layout ONLY on large screens */}
-        <div className="flex flex-col lg:flex-row lg:gap-10 mb-12">
+export default function DynamicRenderer({ code }: { code: string }) {
+  const [RenderedComponent, setRenderedComponent] = useState<any>(null);
 
-          {/* Description Section */}
-          <section className="w-full lg:w-1/2 mb-8 lg:mb-0">
-            <h2 className="text-xl font-semibold text-gray-700 mb-3">
-              Description
-            </h2>
-            <p className="text-gray-700 leading-relaxed whitespace-pre-line">
-              {/*description comes here */ }
-            </p>
-          </section>
+  useEffect(() => {
+    try {
+      // Compile JSX/TSX → plain JS
+      const compiled = Babel.transform(code, {
+        presets: ["react", "typescript"],
+        plugins: ["transform-modules-commonjs"],
+        filename: "dynamic-component.tsx",
+      }).code;
 
-          {/* Images Section */}
-          <section className="w-full lg:w-1/2">
-            <h2 className="text-xl font-semibold text-gray-700 mb-4">
-              Images
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {images.map((src, index) => (
-                <img
-                  key={index}
-                  src={src}
-                  alt={`Lesson Image ${index + 1}`}
-                  className="w-full h-48 object-cover rounded-lg shadow"
-                />
-              ))}
-            </div>
-          </section>
+      // Create a module-like wrapper so we can read module.exports.default
+      const module: any = { exports: {} };
 
-        </div>
+      const requireShim = (name: string) => {
+        if (name === "react") return React;
+        throw new Error(`Unknown import: ${name}`);
+      };
 
-        {/* Video Section – Always on a new row */}
-        { (
-          <section className="w-full mb-10">
-            <h2 className="text-xl font-semibold text-gray-700 mb-4">
-              Video
-            </h2>
-            <div className="relative w-full pb-[56.25%] rounded-lg overflow-hidden shadow-md">
-              <iframe
-        width="853"
-        height="480"
-        src={srcurl}
-        frameBorder="0"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowFullScreen
-        title="Embedded YouTube Video"
-      />
-            </div>
-          </section>
-        )}
-      </div>
-    </div>
+      // Execute compiled code
+      const func = new Function("module", "exports", "require", compiled);
+      func(module, module.exports, requireShim);
 
-    );
+      // Get the default export
+      const Component = module.exports.default;
+
+      if (Component) {
+        setRenderedComponent(() => Component);
+      }
+    } catch (err) {
+      console.error("Error evaluating component:", err);
+    }
+  }, [code]);
+
+  if (!RenderedComponent) return <p>Loading...</p>;
+  return <RenderedComponent />;
 }

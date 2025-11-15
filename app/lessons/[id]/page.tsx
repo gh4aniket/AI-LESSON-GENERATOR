@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { useParams } from "next/navigation";
-import CountingNumbers from "./ai-code";
+import DynamicRenderer from "./ai-code";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -12,7 +12,7 @@ const supabase = createClient(
 export default function LessonView() {
   const { id } = useParams();
   const [lesson, setLesson] = useState<any>(null);
-
+  const[code,setcode]=useState<any>("");
   useEffect(() => {
     async function load() {
       const { data } = await supabase.from("lessons").select("*").eq("id", id).single();
@@ -22,6 +22,7 @@ export default function LessonView() {
 data.generated_code=cleaned;
       setLesson(data);
       console.log(lesson);
+  
     }
     load();
   }, [id]);
@@ -39,7 +40,7 @@ data.generated_code=cleaned;
       
      <p>outline: {lesson.outline}</p>
     <p>data:{lesson.generated_code?lesson.generated_code:"no"}</p>
-     <CountingNumbers/>
+<DynamicRenderer code={lesson.generated_code} />
     </div>
   );
 }

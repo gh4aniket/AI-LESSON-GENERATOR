@@ -20,6 +20,17 @@ export async function POST(req: Request) {
       "${outline}"
 
       Requirements:
+      - The component must include title,description or detailed explanation part.
+      -include an iframe of following type for a youtube video based on the topic:
+      <iframe
+        width="853"
+        height="480"
+        src="https://www.youtube.com/embed/embedId?autoplay=0&controls=1"
+        frameBorder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
+        title="Embedded YouTube Video"
+      />
       - Must include "export default" for a React component.
       - Must not include markdown, no backticks.
       - Return ONLY valid TSX code.
@@ -47,7 +58,7 @@ console.log(code);
 
   await supabase
     .from("lessons")
-    .update({ generated_code: code, status: "generated" })
+    .update({ generated_code: code, status: "generated" ,compiled_js: sandboxResult.js})
     .eq("id", id);
 
   return NextResponse.json({ success: code});
