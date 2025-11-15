@@ -227,24 +227,7 @@ const HowToCookFishLesson = () => {
     contents: prompt,
   });
   const code = completion?.candidates[0].content.parts[0].text || "// generation failed";
-  const sandboxResult = await compileTSXInSandbox(code);
-
- if (!sandboxResult.ok) {
-   await supabase
-    .from("lessons")
-    .update({status: "failed"})
-    .eq("id", id);
-      return NextResponse.json(
-        {
-          ok: false,
-          error: "Lesson TSX failed to compile in sandbox.",
-          details: sandboxResult.error,
-          raw: code,
-        },
-        { status: 422 }
-      );
-    }
-
+ 
   await supabase
     .from("lessons")
     .update({ generated_code: code, status: "generated" ,compiled_js: sandboxResult.js})
