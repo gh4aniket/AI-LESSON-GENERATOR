@@ -228,7 +228,14 @@ const HowToCookFishLesson = () => {
   });
 const code =
   completion?.candidates?.[0]?.content?.parts?.[0]?.text ?? "// generation failed";
-const compiled= await compileTsx(code);
+
+   const compiled = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/compile`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ code }),
+  }).then(r => r.json());
+
+  
   if(!compiled.ok)
   {
     await supabase
