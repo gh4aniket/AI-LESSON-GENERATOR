@@ -16,18 +16,20 @@ async function compile(tsxSource: string): Promise<WorkerResult> {
   try {
     
     const result = await esbuild.build({
-      stdin: {
-        contents: tsxSource,
-        loader: "tsx",
-        resolveDir: process.cwd(),
-        sourcefile: "lesson.tsx",
-      },
-      bundle: true,
-      platform: "node",
-      format: "cjs",
-      write: false,
-      external: ["react"],
-    });
+  stdin: {
+    contents: tsxSource,
+    loader: "tsx",
+    sourcefile: "lesson.tsx",   // ⚡ critical fix
+  },
+  write: false,
+
+  bundle: true,
+  platform: "browser",
+  format: "cjs",
+  target: "es2020",
+
+  external: ["react", "react-dom"],
+});
 
     if (!result.outputFiles || result.outputFiles.length === 0) {
       return { ok: false, error: "Esbuild produced no output" };
