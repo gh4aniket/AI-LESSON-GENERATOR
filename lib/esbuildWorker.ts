@@ -59,7 +59,6 @@ async function compile(tsxSource: string): Promise<WorkerResult> {
     
     const script = new vm.Script(js, {
       filename: "lesson.compiled.js",
-      displayErrors: true,
     });
 
     script.runInContext(context);
