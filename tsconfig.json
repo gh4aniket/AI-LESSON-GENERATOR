@@ -40,9 +40,3 @@
     "node_modules"
   ]
 }
-
-module.exports = {
-  experimental: {
-    turbo: false,
-  },
-};
