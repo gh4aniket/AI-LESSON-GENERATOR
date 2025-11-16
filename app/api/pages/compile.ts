@@ -3,7 +3,8 @@ import * as esbuild from "esbuild";
 import vm from "vm";
 import type { NextApiRequest, NextApiResponse } from "next";
 
-export default async function handler(tsx:string) {
+export async function POST(req: Request) {
+  const { tsx } = await req.json();
   try {
     const result = await esbuild.build({
       stdin: {
