@@ -234,7 +234,7 @@ const code =
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ tsx: code }),
   })
-  
+  consol.log(compiled);
   if(!compiled.ok)
   {
     await supabase
@@ -243,7 +243,6 @@ const code =
     .eq("id", id);
     return NextResponse.json({
       ok:false,
-      error:compiled.error,
       status:422
     },{status:422});
   }
