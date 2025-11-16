@@ -55,7 +55,6 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       ok: true,
-      compiled: js,
     });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
