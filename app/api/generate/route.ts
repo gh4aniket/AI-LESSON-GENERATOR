@@ -245,7 +245,6 @@ console.log(compiled);
     return NextResponse.json({
       ok:false,
       status:422,
-      error: compiled.error,
     },{status:422});
   }
  
