@@ -229,7 +229,7 @@ const HowToCookFishLesson = () => {
 const code =
   completion?.candidates?.[0]?.content?.parts?.[0]?.text ?? "// generation failed";
 
-   const compiled = await fetch(`https://${process.env.VERCEL_URL}/api/pages`, {
+   const compiled = await fetch(`https://${process.env.VERCEL_URL}/api/compile`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({tsx: code }),
