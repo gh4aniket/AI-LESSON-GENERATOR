@@ -1,19 +1,27 @@
-import { NextResponse } from "next/server";
 import * as esbuild from "esbuild";
 import vm from "vm";
+import { NextApiRequest, NextApiResponse } from "next";
 
-export async function POST(req: Request) {
+// 1. MUST use a default export
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
+  // 2. Handle HTTP methods manually
+  if (req.method !== "POST") {
+    res.setHeader("Allow", ["POST"]);
+    return res.status(405).end(`Method ${req.method} Not Allowed`);
+  }
+
   try {
-    const { tsx } = await req.json();
+    // 3. Use the Pages Router pre-parsed body object
+    const { tsx } = req.body;
 
     if (!tsx || typeof tsx !== "string") {
-      return NextResponse.json(
-        { ok: false, error: "Missing or invalid TSX input" },
-        { status: 400 }
-      );
+      return res.status(400).json({ ok: false, error: "Missing or invalid TSX input" });
     }
 
-    // Compile using esbuild
+    // --- Compilation Logic Remains the Same ---
     const result = await esbuild.build({
       stdin: {
         contents: tsx,
@@ -30,13 +38,10 @@ export async function POST(req: Request) {
 
     const js = result.outputFiles?.[0]?.text;
     if (!js) {
-      return NextResponse.json(
-        { ok: false, error: "Esbuild produced no output" },
-        { status: 500 }
-      );
+      return res.status(500).json({ ok: false, error: "Esbuild produced no output" });
     }
 
-    // Sandbox test
+    // Sandbox test (vm is fine as Pages Router uses Node.js runtime)
     const sandbox: any = {
       module: { exports: {} },
       exports: {},
@@ -51,16 +56,15 @@ export async function POST(req: Request) {
     const context = vm.createContext(sandbox);
     const script = new vm.Script(js);
     script.runInContext(context);
+    // -------------------------------------------
 
-    return NextResponse.json({
+    // 4. Use the Pages Router res object for the final response
+    return res.status(200).json({
       ok: true,
       compiled: js,
     });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
-    return NextResponse.json(
-      { ok: false, error: message },
-      { status: 400 }
-    );
+    return res.status(400).json({ ok: false, error: message });
   }
 }
