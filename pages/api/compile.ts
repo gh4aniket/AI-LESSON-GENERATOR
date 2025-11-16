@@ -39,7 +39,7 @@ export default async function handler(req: NextApiRequest,
       ok: true,
       compiled: js,
     });
-  } catch (err: Error) {
+  } catch (err: any) {
     return res.status(400).json({
       ok: false,
       error: (err.message),
