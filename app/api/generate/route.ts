@@ -228,7 +228,7 @@ const HowToCookFishLesson = () => {
   });
 const code =
   completion?.candidates?.[0]?.content?.parts?.[0]?.text ?? "// generation failed";
-const compiled= await compileTSX(code);
+const compiled= await compileTsx(code);
   if(!compiled.ok)
   {
     await supabase
