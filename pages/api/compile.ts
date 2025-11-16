@@ -42,7 +42,7 @@ export default async function handler(req: NextApiRequest,
   } catch (err) {
     return res.status(400).json({
       ok: false,
-      error: err.message,
+      error: String(err.message),
     });
   }
 }
