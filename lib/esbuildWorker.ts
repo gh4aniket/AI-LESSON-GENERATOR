@@ -14,29 +14,21 @@ interface WorkerResult {
 
 async function compile(tsxSource: string): Promise<WorkerResult> {
   try {
-    
-    const result = await esbuild.build({
-  stdin: {
-    contents: tsxSource,
-    loader: "tsx",
-    sourcefile: "lesson.tsx",   // ⚡ critical fix
-  },
-  write: false,
+    // ✅ Use esbuild.transform (no binary → no Vercel crash)
+    const result = await esbuild.transform(tsxSource, {
+      loader: "tsx",
+      format: "cjs",
+      target: "es2020",
+      jsx: "transform",
+      jsxFactory: "React.createElement",
+      jsxFragment: "React.Fragment",
+      sourcemap: false,
+      minify: false,
+    });
 
-  bundle: true,
-  platform: "browser",
-  format: "cjs",
-  target: "es2020",
+    const js = result.code;
 
-  external: ["react", "react-dom"],
-});
-
-    if (!result.outputFiles || result.outputFiles.length === 0) {
-      return { ok: false, error: "Esbuild produced no output" };
-    }
-
-    const js = result.outputFiles[0].text;
-
+    // ✅ VM sandbox
     const sandbox: any = {
       module: { exports: {} },
       exports: {},
@@ -45,9 +37,10 @@ async function compile(tsxSource: string): Promise<WorkerResult> {
           return {
             createElement: () => ({}),
             Component: function () {},
+            Fragment: "fragment",
           };
         }
-        throw new Error(`Blocked module: ${name}`);
+        throw new Error(`Blocked import: ${name}`);
       },
       console: {
         log: () => {},
@@ -58,18 +51,21 @@ async function compile(tsxSource: string): Promise<WorkerResult> {
 
     const context = vm.createContext(sandbox);
 
-    
+    // Execute transformed JS
     const script = new vm.Script(js, {
       filename: "lesson.compiled.js",
+      displayErrors: true,
     });
 
     script.runInContext(context);
 
-    
     const exported = sandbox.module.exports;
 
     if (!exported || !exported.default) {
-      return { ok: false, error: "No default export found in compiled TSX" };
+      return {
+        ok: false,
+        error: "No default export found in compiled TSX",
+      };
     }
 
     return { ok: true, js };
@@ -78,7 +74,7 @@ async function compile(tsxSource: string): Promise<WorkerResult> {
   }
 }
 
-
+// Automatically run inside worker thread
 (async () => {
   const { tsxSource } = workerData as WorkerInput;
   const result = await compile(tsxSource);
