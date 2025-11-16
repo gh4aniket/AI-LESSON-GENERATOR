@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
 import { createClient } from "@supabase/supabase-js";
 import { compileTSXInSandbox } from "@/lib/esbuildSandbox";
-import { compileTsx } from "@/sandbox/compileTSX";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -229,11 +228,7 @@ const HowToCookFishLesson = () => {
   });
 const code =
   completion?.candidates?.[0]?.content?.parts?.[0]?.text ?? "// generation failed";
-   const compiled = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/compile`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ tsx: code }),
-  })
+ const compiled = await compileTSXInSandbox(code);
   console.log(compiled);
   if(!compiled.ok)
   {
@@ -247,6 +242,7 @@ const code =
     },{status:422});
   }
 
+ 
  
   await supabase
     .from("lessons")
