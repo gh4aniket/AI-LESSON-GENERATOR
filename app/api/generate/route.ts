@@ -233,7 +233,7 @@ const code =
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({tsx: code }),
-  }).then(r => r.json());
+  });
 
   
   if(!compiled.ok)
