@@ -228,7 +228,19 @@ const HowToCookFishLesson = () => {
   });
 const code =
   completion?.candidates?.[0]?.content?.parts?.[0]?.text ?? "// generation failed";
-
+const compiled= await compileTSXInSandbox(code);
+  if(!compiled.ok)
+  {
+    await supabase
+    .from("lessons")
+    .update({ status: "failed"})
+    .eq("id", id);
+    return NextResponse.json({
+      ok:false,
+      error:compiled.error,
+      status:422
+    },{status:422});
+  }
  
   await supabase
     .from("lessons")
