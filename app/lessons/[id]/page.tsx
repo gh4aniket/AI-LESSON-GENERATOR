@@ -10,7 +10,7 @@ const supabase = createClient(
 );
 
 export default function LessonView() {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
   const [lesson, setLesson] = useState<any>(null);
   const[code,setcode]=useState<any>("");
   useEffect(() => {
