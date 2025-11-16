@@ -234,7 +234,7 @@ const code =
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({tsx: code }),
   });
-
+console.log(compiled);
   
   if(!compiled.ok)
   {
