@@ -244,7 +244,6 @@ const code =
     .eq("id", id);
     return NextResponse.json({
       ok:false,
-      error:compiled.error,
       status:422
     },{status:422});
   }
