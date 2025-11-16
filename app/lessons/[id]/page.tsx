@@ -16,7 +16,9 @@ export default function LessonView() {
   const [id,setid]=useState<any>("");
   useEffect(() => {
     async function load() {
-      setid(params.id);
+     if(params){
+        setid(params.id);
+     }
       const { data } = await supabase.from("lessons").select("*").eq("id", id).single();
       const cleaned = data.generated_code?data.generated_code
   .replace(/^```(?:tsx)?\s*\n/, "") 
