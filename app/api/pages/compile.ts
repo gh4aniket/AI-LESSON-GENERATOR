@@ -1,11 +1,20 @@
-// pages/api/compile.ts
+// app/api/compile/route.ts
+import { NextResponse } from "next/server";
 import * as esbuild from "esbuild";
 import vm from "vm";
-import type { NextApiRequest, NextApiResponse } from "next";
 
 export async function POST(req: Request) {
-  const { tsx } = await req.json();
   try {
+    const { tsx } = await req.json();
+
+    if (!tsx || typeof tsx !== "string") {
+      return NextResponse.json(
+        { ok: false, error: "Missing or invalid TSX input" },
+        { status: 400 }
+      );
+    }
+
+    // Compile using esbuild
     const result = await esbuild.build({
       stdin: {
         contents: tsx,
@@ -20,27 +29,39 @@ export async function POST(req: Request) {
       external: ["react", "react-dom"],
     });
 
-    const js = result.outputFiles[0].text;
+    const js = result.outputFiles?.[0]?.text;
+    if (!js) {
+      return NextResponse.json(
+        { ok: false, error: "Esbuild produced no output" },
+        { status: 500 }
+      );
+    }
 
-    // sandbox test
+    // Sandbox test
     const sandbox: any = {
       module: { exports: {} },
       exports: {},
-      require: () => ({}),
+      require: () => ({}), // block imports
+      console: {
+        log: () => {},
+        error: () => {},
+        warn: () => {},
+      },
     };
 
     const context = vm.createContext(sandbox);
     const script = new vm.Script(js);
     script.runInContext(context);
 
-    return res.status(200).json({
+    return NextResponse.json({
       ok: true,
       compiled: js,
     });
-  } catch (err: any) {
-    return res.status(400).json({
-      ok: false,
-      error: (err.message),
-    });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    return NextResponse.json(
+      { ok: false, error: message },
+      { status: 400 }
+    );
   }
 }
