@@ -232,7 +232,7 @@ const code =
    const compiled = await fetch(`https://${process.env.VERCEL_URL}/api/pages/compile`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ code }),
+    body: JSON.stringify({tsx: code }),
   }).then(r => r.json());
 
   
