@@ -39,10 +39,10 @@ export default async function handler(req: NextApiRequest,
       ok: true,
       compiled: js,
     });
-  } catch (err) {
+  } catch (err: Error) {
     return res.status(400).json({
       ok: false,
-      error: String(err.message),
+      error: (err.message),
     });
   }
 }
