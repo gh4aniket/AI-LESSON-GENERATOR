@@ -10,11 +10,13 @@ const supabase = createClient(
 );
 
 export default function LessonView() {
-  const { id } = useParams<{ id: string }>();
+  const params = useParams<{ id: string }>();
   const [lesson, setLesson] = useState<any>(null);
   const[code,setcode]=useState<any>("");
+  const [id,setid]=useState<any>("");
   useEffect(() => {
     async function load() {
+      setid(params.id);
       const { data } = await supabase.from("lessons").select("*").eq("id", id).single();
       const cleaned = data.generated_code?data.generated_code
   .replace(/^```(?:tsx)?\s*\n/, "") 
